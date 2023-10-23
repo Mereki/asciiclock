@@ -5,7 +5,7 @@ digit = [[['0', '0', '0'], ['0', ' ', '0'], ['0', ' ', '0'], ['0', ' ', '0'], ['
          [['4', ' ', '4'], ['4', ' ', '4'], ['4', '4', '4'], [' ', ' ', '4'], [' ', ' ', '4']],  # 4
          [['5', '5', '5'], ['5', ' ', ' '], ['5', '5', '5'], [' ', ' ', '5'], ['5', '5', '5']],  # 5
          [['6', '6', '6'], ['6', ' ', ' '], ['6', '6', '6'], ['6', ' ', '6'], ['6', '6', '6']],  # 6
-         [['7', '7', '7'], [' ', ' ', '7'], [' ', ' ', ' '], [' ', ' ', '7'], [' ', ' ', '7']],  # 7
+         [['7', '7', '7'], [' ', ' ', '7'], [' ', ' ', '7'], [' ', ' ', '7'], [' ', ' ', '7']],  # 7
          [['8', '8', '8'], ['8', ' ', '8'], ['8', '8', '8'], ['8', ' ', '8'], ['8', '8', '8']],  # 8
          [['9', '9', '9'], ['9', ' ', '9'], ['9', '9', '9'], [' ', ' ', '9'], ['9', '9', '9']],  # 9
          [[' '], [':'], [' '], [':'], [' ']]]  # :
@@ -35,13 +35,10 @@ if clock_type == '12':
 
 # assuming default is AM, if original format is 24hr but user wants to convert, takes into consideration
 # we need to convert the two-digit numbers that are >= 13
-which_pd = False  # default will be AM
 if clock_type == '12':
     if time[2] == ':':  # ex: 13:52 is a 24hr, and the colon is in index 2
         time_temp = time
-        print(time_temp)
-        if int(time[0] + time[1]) > 12 and period_flag:
-            which_pd = True 
+        if int(time[0] + time[1]) >= 12 and period_flag:
             time = time_temp + "PM"
         else:
             time = time_temp + "AM"
@@ -52,7 +49,7 @@ if clock_type == '12':
 first_two = time[0] + time[1]
 if clock_type == '12' and time[1] != ':':
     if int(first_two) > 12:
-        newTime = str(int(first_two) - 12)
+        newTime = str(abs(int(first_two)) - 12)
         if 1 <= int(newTime) <= 9:
             first_digit = newTime[0]
             time_temp = time
@@ -62,48 +59,54 @@ if clock_type == '12' and time[1] != ':':
             second_digit = newTime[1]
             time_temp = time
             time = first_digit + second_digit + time_temp[2:]
+    elif int(first_two) == 0:
+        time_temp = time
+        time = "12" + time_temp[2:]
 
-if time[0] == '0' and clock_type == '12':
-    time = time.replace('0', '1')
+if clock_type == '12' and int(time[0]) == 0 and time[1] == ':':
+    time_temp = time
+    time = "12" + time_temp[1:]
 
 for i in range(5):
     digit_line = ""
-
     for index in range(len(time)):
         char = time[index]
         if period_flag:  # 12 hour time
-            if which_pd:  # if false (AM)
-                if char == ":":
-                    for j in digit[10][i]:
-                        digit_line += j
-                elif char == "A":
-                    for j in period[0][i]:
-                        digit_line += j
-                elif char == "P":
-                    for j in period[1][i]:
-                        digit_line += j
-                elif char == "M":
-                    for j in period[2][i]:
-                        digit_line += j
-                else:
-                    for j in digit[int(char)][i]:
-                        if j != ' ':  # then we need to possibly replace character
-                            if pref_char == '':
-                                digit_line += j
-                            else:
-                                digit_line += pref_char
+            if char == ":":
+                for j in digit[10][i]:
+                    digit_line += j
+            elif char == "A":
+                for j in period[0][i]:
+                    digit_line += j
+            elif char == "P":
+                for j in period[1][i]:
+                    digit_line += j
+            elif char == "M":
+                for j in period[2][i]:
+                    digit_line += j
+            else:
+                for j in digit[int(char)][i]:
+                    if j != ' ':  # then we need to possibly replace character
+                        if pref_char == '':
+                            digit_line += j
                         else:
-                            digit_line += ' '
-                digit_line += " "
-        else:
-            for j in digit[int(char)][i]:
-                if j != ' ':  # then we need to possibly replace character
-                    if pref_char == '':
-                        digit_line += j
+                            digit_line += pref_char
                     else:
-                        digit_line += pref_char
-                else:
-                    digit_line += ' '
+                        digit_line += ' '
+            digit_line += " "
+        else:  # 24 hr time
+            if char == ":":
+                for j in digit[10][i]:
+                    digit_line += j
+            else:
+                for j in digit[int(char)][i]:
+                    if j != ' ':  # then we need to possibly replace character
+                        if pref_char == '':
+                            digit_line += j
+                        else:
+                            digit_line += pref_char
+                    else:
+                        digit_line += ' '
             digit_line += " "
             # 24 hour time
         if index == len(time) - 1:  # remove the last space
