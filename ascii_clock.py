@@ -35,7 +35,7 @@ if clock_type == '12':
 
 # assuming default is AM, if original format is 24hr but user wants to convert, takes into consideration
 # we need to convert the two-digit numbers that are >= 13
-if clock_type == '12':
+if period_flag:
     if time[2] == ':':  # ex: 13:52 is a 24hr, and the colon is in index 2
         time_temp = time
         if int(time[0] + time[1]) >= 12 and period_flag:
@@ -47,7 +47,7 @@ if clock_type == '12':
 
 # convert 24hr to 12hr if 24hr >= 13:00
 first_two = time[0] + time[1]
-if clock_type == '12' and time[1] != ':':
+if period_flag and time[1] != ':':
     if int(first_two) > 12:
         newTime = str(abs(int(first_two)) - 12)
         if 1 <= int(newTime) <= 9:
@@ -63,7 +63,7 @@ if clock_type == '12' and time[1] != ':':
         time_temp = time
         time = "12" + time_temp[2:]
 
-if clock_type == '12' and int(time[0]) == 0 and time[1] == ':':
+if period_flag and int(time[0]) == 0 and time[1] == ':':
     time_temp = time
     time = "12" + time_temp[1:]
 
